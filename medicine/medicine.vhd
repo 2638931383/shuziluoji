@@ -1,0 +1,83 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+entity medicine is
+	port(flashTime:in std_logic;--clk
+		 workStart:in std_logic; --control start
+		 chooseFunc:in std_logic_vector(1 downto 0); --this is function control
+		-- lightSum100:out std_logic_vector(3 downto 0);
+		-- lightSum10:out std_logic_vector(3 downto 0);
+		-- lightSum1:out std_logic_vector(3 downto 0);   --those are light that show how many medicine there are all existing.
+		-- lightEach10:out std_logic_vector(3 downto 0);
+		-- lightEach1:out std_logic_vector (3 downto 0) --those are light that show how many medicine there are existing each.
+		OlightSum10,OlightSum1,OlightEach10,OlightEach1:out std_logic_vector(6 downto 0);
+		error_status_Light:out std_logic_vector(6 downto 0)--this light is going to show the workError and work Status.
+);
+end medicine;
+architecture act of medicine is
+	component showLight
+		 port(
+			lightSum10 : in std_logic_vector(3 downto 0);
+			lightSum1 : in std_logic_vector(3 downto 0);
+			lightEach10 : in std_logic_vector(3 downto 0);
+			lightEach1 : in std_logic_vector(3 downto 0);
+			OlightSum10 : out std_logic_vector(6 downto 0);
+			OlightSum1 : out std_logic_vector(6 downto 0);
+			OlightEach10 : out std_logic_vector(6 downto 0);
+			OlightEach1 : out std_logic_vector(6 downto 0));
+	end component;
+	component showError
+			port(clk:in std_logic;
+				 errorType:in std_logic_vector(2 downto 0);
+				 errorLight:out std_logic_vector(6 downto 0));
+	end component;
+	component showStatus
+				port(errorType:in std_logic_vector(3 downto 0);
+					chooseFunc:in std_logic_vector(1 downto 0);
+					clk:in std_logic;
+					statusLight:out std_logic_vector(6 downto 0)
+			);
+	end component;
+	--component workStatus
+	--	port(
+	--		);
+	--end component;
+	--component setStatus
+	--	port();
+	--end component;
+	--component clearStatus
+	--	port();
+	--end component;
+	signal tempLightSum10,tempLightSum1,tempLightEach10,tempLightEach1:std_logic_vector(3 downto 0);
+	signal tempOlightSum10,tempOlightSum1,tempOlightEach10,tempOlightEach1: std_logic_vector(6 downto 0);
+	signal errorType:std_logic_vector(2 downto 0);
+	signal a:std_logic;
+	begin
+		process(chooseFunc,workStart)
+		begin
+			if(workStart='1')then
+				errorType<="000";
+				if(chooseFunc="00") then
+				a<='1';
+				--workStatus
+				elsif(chooseFunc="01")then
+				a<='1';
+				--setStatus
+				elsif(chooseFunc="11")then
+				a<='1';
+				--clearStatus
+				else 
+				a<='1';
+				--otherStatus/showError
+				end if;
+				u3:showStatus port map(errorType,chooseFunc,flashTime,error_status_Light);
+				u1:showLight port map(tempLightSum10,tempLightSum1,tempLightEach10,tempLightEach1,OlightSum10,OlightSum1,OlightEach10,OlightEach1);
+				--show Light
+			else 
+				errorType<="001";
+				u2:showError port map(flashTime,errorType,error_status_Light);--show Error:not open workStart
+			end if;
+			
+		end process;
+		
+			
